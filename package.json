@@ -1,0 +1,19 @@
+{
+  "name": "angular-di-transformer",
+  "version": "1.0.0",
+  "description": "A tool that automates the migration of dependency injections from traditional constructor-based injection to the new, more efficient inject() method.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EriN-B/angular-di-transformer.git#main"
+  },
+  "author": "Erin Bachmann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EriN-B/angular-di-transformer/issues"
+  },
+  "homepage": "https://github.com/EriN-B/angular-di-transformer/tree/main#readme"
+}
