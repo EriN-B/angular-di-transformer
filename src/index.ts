@@ -2,11 +2,18 @@
 import {Project, Scope, SourceFile} from "ts-morph";
 import { AngularSpecifications } from "./config/angular.specifications";
 import {isWorktreeClean} from "./utils/checkWorkTree";
+import {getAngularVersion, isAngularWorkspace} from "./utils/checkAngularWorkspace";
 
 
 function main(){
+
     if (!isWorktreeClean()) {
         console.error('Your Git worktree is not clean. Please commit or stash your changes before running this script.');
+        process.exit(1);
+    }
+
+    if(!isAngularWorkspace() && getAngularVersion() >= 14){
+        console.error('Please run this command inside of a Angular Workspace with a version of Angular/core of >= 14');
         process.exit(1);
     }
 
