@@ -4,6 +4,7 @@
   "description": "A tool that automates the migration of dependency injections from traditional constructor-based injection to the new, more efficient inject() method.",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +16,13 @@
   "bugs": {
     "url": "https://github.com/EriN-B/angular-di-transformer/issues"
   },
-  "homepage": "https://github.com/EriN-B/angular-di-transformer/tree/main#readme"
+  "homepage": "https://github.com/EriN-B/angular-di-transformer/tree/main#readme",
+  "devDependencies": {
+    "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "ts-morph": "^21.0.1",
+    "ts-node": "^10.9.1"
+  }
 }
