@@ -7,6 +7,9 @@
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "transform": "dist/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EriN-B/angular-di-transformer.git#main"
