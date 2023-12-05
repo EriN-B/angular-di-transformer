@@ -1,56 +1,68 @@
 #!/usr/bin/env node
-import {Project, Scope} from "ts-morph";
+import { Project, Scope, SourceFile } from "ts-morph";
+import { AngularSpecifications } from "./config/angular.specifications";
 
 const project = new Project();
 project.addSourceFilesFromTsConfig(`${process.cwd()}/tsconfig.json`);
 
 project.getSourceFiles().forEach(sourceFile => {
+    try {
+        refactorConstructors(sourceFile);
+    } catch (error) {
+        console.error(`Error processing file ${sourceFile.getFilePath()}: ${error}`);
+    }
+});
 
-    let foundInjectImport = false;
+project.save();
 
-    // Check if 'inject' is already imported from '@angular/core'
+/**
+ * Ensures that the 'inject' import from '@angular/core' exists in the file.
+ * @param {SourceFile} sourceFile - The source file to process.
+ */
+function ensureInjectImport(sourceFile: SourceFile) {
+    const moduleSpecifierSpec = AngularSpecifications.importDeclaration.moduleSpecifier;
+    const namedImportsSpec = AngularSpecifications.importDeclaration.namedImports;
+
     const angularCoreImport = sourceFile.getImportDeclaration(declaration => {
-        return declaration.getModuleSpecifierValue() === '@angular/core';
+        return declaration.getModuleSpecifierValue() === moduleSpecifierSpec;
     });
 
-    if (angularCoreImport) {
-        const namedImports = angularCoreImport.getNamedImports();
-        foundInjectImport = namedImports.some(namedImport => namedImport.getName() === 'inject');
-    }
+    const foundInjectImport = angularCoreImport?.getNamedImports()
+        .some(namedImport => namedImport.getName() === namedImportsSpec.name);
 
-    // If 'inject' is not imported, add the import
     if (!foundInjectImport) {
         sourceFile.addImportDeclaration({
-            moduleSpecifier: '@angular/core',
-            namedImports: [{ name: 'inject' }],
+            moduleSpecifier: moduleSpecifierSpec,
+            namedImports: [namedImportsSpec],
         });
     }
+}
 
+/**
+ * Refactors constructors in the source file to use 'inject'.
+ * @param {SourceFile} sourceFile - The source file to process.
+ */
+function refactorConstructors(sourceFile: SourceFile) {
     sourceFile.getClasses().forEach(classDeclaration => {
         classDeclaration.getConstructors().forEach(constructorDeclaration => {
             constructorDeclaration.getParameters().forEach(parameterDeclaration => {
                 const type = parameterDeclaration.getType();
                 const name = parameterDeclaration.getName();
 
-                // Add new property with inject
                 if (type) {
                     classDeclaration.addProperty({
                         scope: Scope.Private,
                         name,
                         initializer: `inject(${type.getText()})`
                     });
-
-                    // Remove parameter from constructor
                     parameterDeclaration.remove();
+                    ensureInjectImport(sourceFile);
                 }
             });
 
-            // If constructor is now empty, remove it
             if (constructorDeclaration.getParameters().length === 0) {
                 constructorDeclaration.remove();
             }
         });
     });
-});
-
-project.save();
+}
