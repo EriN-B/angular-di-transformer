@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {Project, Scope, SourceFile, StructureKind, ts} from "ts-morph";
+import {Project, Scope, SourceFile} from "ts-morph";
 import { AngularSpecifications } from "./config/angular.specifications";
 
 const project = new Project();
@@ -50,13 +50,13 @@ function refactorConstructors(sourceFile: SourceFile) {
                 const name = parameterDeclaration.getName();
 
                 if (type) {
-                    const prop = {
+                    const property = {
                         scope: Scope.Private,
                         name,
                         initializer: `inject(${type.getText()})`
                     };
 
-                    classDeclaration.insertProperty(0, prop)
+                    classDeclaration.insertProperty(0, property)
                     parameterDeclaration.remove();
                     ensureInjectImport(sourceFile);
                 }
