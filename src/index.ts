@@ -21,7 +21,7 @@ function main(){
         }
     });
 
-    project.save().then(r => console.log(r));
+    project.save().then(r => console.log('All done'));
 
     /**
      * Ensures that the 'inject' import from '@angular/core' exists in the file.
