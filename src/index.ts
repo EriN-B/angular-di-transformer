@@ -2,11 +2,10 @@
 import {
     ClassDeclaration,
     ConstructorDeclaration,
-    Expression, ParameterDeclaration,
+    ParameterDeclaration,
     Project,
     Scope,
     SourceFile,
-    Statement,
     ts, TypeNode
 } from "ts-morph";
 import {isWorktreeClean} from "./utils/check-work-tree";
