@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-import {Project, Scope, SourceFile} from "ts-morph";
+import {Project, Scope, SourceFile, ts} from "ts-morph";
 import { AngularSpecifications } from "./config/angular.specifications";
 import {isWorktreeClean} from "./utils/check-work-tree";
 import {getAngularVersion, isAngularWorkspace} from "./utils/check-angular-workspace";
 import {checkArgs, init} from "./utils/check-args";
+import {yellow} from "chalk";
 
 
 function main(){
@@ -70,8 +71,10 @@ function main(){
                     constructorDeclaration.getParameters().forEach(parameterDeclaration => {
                         const type = parameterDeclaration.getTypeNode();
                         const name = parameterDeclaration.getName();
+                        const constructorBody = constructorDeclaration.getBody();
 
-                        if (type) {
+
+                        if (type && (constructorBody && constructorBody.getDescendantStatements().length === 0)) {
                             const property = {
                                 scope: Scope.Private,
                                 name,
@@ -81,17 +84,14 @@ function main(){
                             classDeclaration.insertProperty(0, property)
                             parameterDeclaration.remove();
                             ensureInjectImport(sourceFile);
+
+                            if (constructorDeclaration.getParameters().length === 0) {
+                                constructorDeclaration.remove();
+                            }
+                        }else{
+                            console.log(yellow(`Constructor of ${sourceFile.getBaseName()} contains code. Skipping refactoring of constructor`))
                         }
                     });
-
-                    if (constructorDeclaration.getParameters().length === 0) {
-                        const constructorBody = constructorDeclaration.getBody();
-                        const hasCodeInBody = constructorBody && constructorBody.getDescendantStatements().length > 0;
-
-                        if (!hasCodeInBody) {
-                            constructorDeclaration.remove();
-                        }
-                    }
                 });
             });
         }
