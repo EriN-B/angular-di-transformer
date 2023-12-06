@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "prettier": "prettier --config .prettierrc src/**/*.ts --write",
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
   "bin": {
     "transform": "dist/index.js"
