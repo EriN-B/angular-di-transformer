@@ -1,5 +1,14 @@
 #!/usr/bin/env node
-import {Project, Scope, SourceFile, ts} from "ts-morph";
+import {
+    ClassDeclaration,
+    ConstructorDeclaration,
+    Expression, ParameterDeclaration,
+    Project,
+    Scope,
+    SourceFile,
+    Statement,
+    ts, TypeNode
+} from "ts-morph";
 import {isWorktreeClean} from "./utils/check-work-tree";
 import {getAngularVersion, isAngularWorkspace} from "./utils/check-angular-workspace";
 import {checkArgs, init} from "./utils/check-args";
@@ -33,10 +42,53 @@ function main(){
 
     project.save().then(r => console.log('All done'));
 
-    /**
-     * Ensures that the 'inject' import from '@angular/core' exists in the file.
-     * @param {SourceFile} sourceFile - The source file to process.
-     */
+
+    function refactorConstructors(sourceFile: SourceFile) {
+        if (!checkArgs(args.scheme, sourceFile)) {
+            return;
+        }
+
+        sourceFile.getClasses().forEach(classDeclaration => {
+            classDeclaration.getConstructors().forEach(constructorDeclaration => {
+                refactorConstructor(constructorDeclaration, classDeclaration, sourceFile);
+            });
+        });
+    }
+
+    function refactorConstructor(constructorDeclaration: ConstructorDeclaration, classDeclaration: ClassDeclaration, sourceFile: SourceFile) {
+        constructorDeclaration.getParameters().forEach(parameterDeclaration => {
+            const type = parameterDeclaration.getTypeNode();
+            const name = parameterDeclaration.getName();
+            const constructorBody = constructorDeclaration.getBody();
+
+            if (!type) {
+                return;
+            }
+
+            if (shouldRefactorConstructor(constructorBody, args)) {
+                insertPropertyAndRemoveParameter(classDeclaration, name, type, parameterDeclaration);
+                ensureInjectImport(sourceFile);
+                removeConstructorIfEmpty(constructorDeclaration, constructorBody);
+            } else {
+                console.log(yellow(`Constructor of ${sourceFile.getBaseName()} has descendant Statements. Skipping refactoring of constructor. You can disable this behaviour with the -c option`));
+            }
+        });
+    }
+
+    function shouldRefactorConstructor(constructorBody:  any, args:  {scheme: string[] | undefined, constr: boolean | undefined}) {
+        return (constructorBody && constructorBody.getDescendantStatements().length === 0) || args.constr;
+    }
+
+    function insertPropertyAndRemoveParameter(classDeclaration: ClassDeclaration, name:string, type:TypeNode<ts.TypeNode>, parameterDeclaration:ParameterDeclaration) {
+        const property = {
+            scope: Scope.Private,
+            name,
+            initializer: `inject(${type.getText()})`
+        };
+
+        classDeclaration.insertProperty(0, property);
+        parameterDeclaration.remove();
+    }
     function ensureInjectImport(sourceFile: SourceFile) {
         const moduleSpecifierSpec = '@angular/core';
         const namedImportsSpec = { name: 'inject' };
@@ -59,42 +111,12 @@ function main(){
             }
         }
     }
-    /**
-     * Refactors constructors in the source file to use 'inject'.
-     * @param {SourceFile} sourceFile - The source file to process.
-     */
-    function refactorConstructors(sourceFile: SourceFile) {
-        if(checkArgs(args,sourceFile)){
-            sourceFile.getClasses().forEach(classDeclaration => {
-                classDeclaration.getConstructors().forEach(constructorDeclaration => {
-                    constructorDeclaration.getParameters().forEach(parameterDeclaration => {
-                        const type = parameterDeclaration.getTypeNode();
-                        const name = parameterDeclaration.getName();
-                        const constructorBody = constructorDeclaration.getBody();
-
-
-                        if (type && (constructorBody && constructorBody.getDescendantStatements().length === 0)) {
-                            const property = {
-                                scope: Scope.Private,
-                                name,
-                                initializer: `inject(${type.getText()})`
-                            };
-
-                            classDeclaration.insertProperty(0, property)
-                            parameterDeclaration.remove();
-                            ensureInjectImport(sourceFile);
-
-                            if (constructorDeclaration.getParameters().length === 0) {
-                                constructorDeclaration.remove();
-                            }
-                        }else{
-                            console.log(yellow(`Constructor of ${sourceFile.getBaseName()} contains code. Skipping refactoring of constructor`))
-                        }
-                    });
-                });
-            });
+    function removeConstructorIfEmpty(constructorDeclaration: ConstructorDeclaration, constructorBody:any) {
+        if (constructorDeclaration.getParameters().length === 0 && constructorBody && constructorBody.getDescendantStatements().length === 0) {
+            constructorDeclaration.remove();
         }
     }
+
 }
 
 main();
