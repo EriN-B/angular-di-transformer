@@ -1,12 +1,22 @@
 #!/usr/bin/env node
 import {Project, Scope, SourceFile} from "ts-morph";
 import { AngularSpecifications } from "./config/angular.specifications";
-import {isWorktreeClean} from "./utils/checkWorkTree";
+import {isWorktreeClean} from "./utils/check-work-tree";
+import {getAngularVersion, isAngularWorkspace} from "./utils/check-angular-workspace";
+import {checkArgs, init} from "./utils/check-args";
 
 
 function main(){
+
+    const args = init();
+
     if (!isWorktreeClean()) {
         console.error('Your Git worktree is not clean. Please commit or stash your changes before running this script.');
+        process.exit(1);
+    }
+
+    if(!isAngularWorkspace() && getAngularVersion() >= 14){
+        console.error('Please run this command inside of a Angular Workspace with a version of Angular/core of >= 14');
         process.exit(1);
     }
 
@@ -51,30 +61,32 @@ function main(){
      * @param {SourceFile} sourceFile - The source file to process.
      */
     function refactorConstructors(sourceFile: SourceFile) {
-        sourceFile.getClasses().forEach(classDeclaration => {
-            classDeclaration.getConstructors().forEach(constructorDeclaration => {
-                constructorDeclaration.getParameters().forEach(parameterDeclaration => {
-                    const type = parameterDeclaration.getTypeNode();
-                    const name = parameterDeclaration.getName();
+        if(checkArgs(args,sourceFile)){
+            sourceFile.getClasses().forEach(classDeclaration => {
+                classDeclaration.getConstructors().forEach(constructorDeclaration => {
+                    constructorDeclaration.getParameters().forEach(parameterDeclaration => {
+                        const type = parameterDeclaration.getTypeNode();
+                        const name = parameterDeclaration.getName();
 
-                    if (type) {
-                        const property = {
-                            scope: Scope.Private,
-                            name,
-                            initializer: `inject(${type.getText()})`
-                        };
+                        if (type) {
+                            const property = {
+                                scope: Scope.Private,
+                                name,
+                                initializer: `inject(${type.getText()})`
+                            };
 
-                        classDeclaration.insertProperty(0, property)
-                        parameterDeclaration.remove();
-                        ensureInjectImport(sourceFile);
+                            classDeclaration.insertProperty(0, property)
+                            parameterDeclaration.remove();
+                            ensureInjectImport(sourceFile);
+                        }
+                    });
+
+                    if (constructorDeclaration.getParameters().length === 0) {
+                        constructorDeclaration.remove();
                     }
                 });
-
-                if (constructorDeclaration.getParameters().length === 0) {
-                    constructorDeclaration.remove();
-                }
             });
-        });
+        }
     }
 }
 

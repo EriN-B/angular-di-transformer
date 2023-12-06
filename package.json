@@ -1,11 +1,14 @@
 {
   "name": "angular-di-transformer",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "A tool that automates the migration of dependency injections from traditional constructor-based injection to the new, more efficient inject() method.",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "transform": "dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -21,7 +24,8 @@
     "typescript": "^5.3.2"
   },
   "dependencies": {
-    "commander": "^11.1.0",
+    "chalk": "^4.1.2",
+    "ts-command-line-args": "^2.5.1",
     "ts-morph": "^21.0.1",
     "ts-node": "^10.9.1"
   }
