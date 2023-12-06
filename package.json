@@ -4,6 +4,7 @@
   "description": "A tool that automates the migration of dependency injections from traditional constructor-based injection to the new, more efficient inject() method.",
   "main": "index.js",
   "scripts": {
+    "prettier": "prettier --config .prettierrc src/**/*.ts --write",
     "build": "tsc"
   },
   "bin": {
@@ -20,6 +21,8 @@
   },
   "homepage": "https://github.com/EriN-B/angular-di-transformer/tree/main#readme",
   "devDependencies": {
+    "pre-commit": "^1.2.2",
+    "prettier": "^3.1.0",
     "typescript": "^5.3.2"
   },
   "dependencies": {
@@ -27,5 +30,8 @@
     "ts-command-line-args": "^2.5.1",
     "ts-morph": "^21.0.1",
     "ts-node": "^10.9.1"
-  }
+  },
+  "pre-commit": [
+    "prettier"
+  ]
 }
