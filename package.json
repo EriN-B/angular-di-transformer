@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/EriN-B/angular-di-transformer/tree/main#readme",
   "devDependencies": {
+    "prettier": "^3.1.0",
     "typescript": "^5.3.2"
   },
   "dependencies": {
