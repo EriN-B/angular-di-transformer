@@ -3,9 +3,12 @@ import {Project, Scope, SourceFile} from "ts-morph";
 import { AngularSpecifications } from "./config/angular.specifications";
 import {isWorktreeClean} from "./utils/checkWorkTree";
 import {getAngularVersion, isAngularWorkspace} from "./utils/checkAngularWorkspace";
+import {hasArgs, init} from "./utils/hasArgs";
 
 
 function main(){
+
+    const args = init();
 
     if (!isWorktreeClean()) {
         console.error('Your Git worktree is not clean. Please commit or stash your changes before running this script.');
@@ -58,30 +61,32 @@ function main(){
      * @param {SourceFile} sourceFile - The source file to process.
      */
     function refactorConstructors(sourceFile: SourceFile) {
-        sourceFile.getClasses().forEach(classDeclaration => {
-            classDeclaration.getConstructors().forEach(constructorDeclaration => {
-                constructorDeclaration.getParameters().forEach(parameterDeclaration => {
-                    const type = parameterDeclaration.getTypeNode();
-                    const name = parameterDeclaration.getName();
+        if(hasArgs(args,sourceFile)){
+            sourceFile.getClasses().forEach(classDeclaration => {
+                classDeclaration.getConstructors().forEach(constructorDeclaration => {
+                    constructorDeclaration.getParameters().forEach(parameterDeclaration => {
+                        const type = parameterDeclaration.getTypeNode();
+                        const name = parameterDeclaration.getName();
 
-                    if (type) {
-                        const property = {
-                            scope: Scope.Private,
-                            name,
-                            initializer: `inject(${type.getText()})`
-                        };
+                        if (type) {
+                            const property = {
+                                scope: Scope.Private,
+                                name,
+                                initializer: `inject(${type.getText()})`
+                            };
 
-                        classDeclaration.insertProperty(0, property)
-                        parameterDeclaration.remove();
-                        ensureInjectImport(sourceFile);
+                            classDeclaration.insertProperty(0, property)
+                            parameterDeclaration.remove();
+                            ensureInjectImport(sourceFile);
+                        }
+                    });
+
+                    if (constructorDeclaration.getParameters().length === 0) {
+                        constructorDeclaration.remove();
                     }
                 });
-
-                if (constructorDeclaration.getParameters().length === 0) {
-                    constructorDeclaration.remove();
-                }
             });
-        });
+        }
     }
 }
 
