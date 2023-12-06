@@ -5,3 +5,6 @@ A tool that automates the migration of dependency injections from traditional co
 ```
 npx transform
 ```
+Note that this is a basic implementation that does not (yet) cover more complex or non-standard constructor use cases.
+
+Use with caution and check the changes made by the package.
