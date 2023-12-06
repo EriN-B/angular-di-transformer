@@ -31,5 +31,8 @@
     "ts-command-line-args": "^2.5.1",
     "ts-morph": "^21.0.1",
     "ts-node": "^10.9.1"
-  }
+  },
+  "pre-commit": [
+    "prettier"
+  ]
 }
