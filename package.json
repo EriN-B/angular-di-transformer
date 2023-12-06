@@ -1,6 +1,6 @@
 {
   "name": "angular-di-transformer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A tool that automates the migration of dependency injections from traditional constructor-based injection to the new, more efficient inject() method.",
   "main": "index.js",
   "scripts": {

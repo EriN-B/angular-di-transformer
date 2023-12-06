@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import {Project, Scope, SourceFile} from "ts-morph";
 import { AngularSpecifications } from "./config/angular.specifications";
-import {isWorktreeClean} from "./utils/checkWorkTree";
-import {getAngularVersion, isAngularWorkspace} from "./utils/checkAngularWorkspace";
-import {hasArgs, init} from "./utils/hasArgs";
+import {isWorktreeClean} from "./utils/check-work-tree";
+import {getAngularVersion, isAngularWorkspace} from "./utils/check-angular-workspace";
+import {checkArgs, init} from "./utils/check-args";
 
 
 function main(){
@@ -61,7 +61,7 @@ function main(){
      * @param {SourceFile} sourceFile - The source file to process.
      */
     function refactorConstructors(sourceFile: SourceFile) {
-        if(hasArgs(args,sourceFile)){
+        if(checkArgs(args,sourceFile)){
             sourceFile.getClasses().forEach(classDeclaration => {
                 classDeclaration.getConstructors().forEach(constructorDeclaration => {
                     constructorDeclaration.getParameters().forEach(parameterDeclaration => {

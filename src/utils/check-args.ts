@@ -2,7 +2,7 @@ import {SourceFile} from "ts-morph";
 import {parse} from "ts-command-line-args";
 import {bgMagenta, blue} from "chalk";
 
-export function hasArgs(args:string[] | undefined, sourceFile: SourceFile){
+export function checkArgs(args:string[] | undefined, sourceFile: SourceFile){
     if(args){
         return args.some(substring => sourceFile.getBaseName().includes(substring));
     }else{
