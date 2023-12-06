@@ -49,7 +49,12 @@ function main(){
 
         sourceFile.getClasses().forEach(classDeclaration => {
             classDeclaration.getConstructors().forEach(constructorDeclaration => {
-                refactorConstructor(constructorDeclaration, classDeclaration, sourceFile);
+                const constructorBody = constructorDeclaration.getBody();
+                if(shouldRefactorConstructor(constructorBody, args)){
+                    refactorConstructor(constructorDeclaration, classDeclaration, sourceFile);
+                }else {
+                    console.log(yellow(`Constructor of ${sourceFile.getBaseName()} has descendant Statements. Skipping refactoring of constructor. You can disable this behaviour with the -c option`));
+                }
             });
         });
     }
@@ -64,13 +69,9 @@ function main(){
                 return;
             }
 
-            if (shouldRefactorConstructor(constructorBody, args)) {
-                insertPropertyAndRemoveParameter(classDeclaration, name, type, parameterDeclaration);
-                ensureInjectImport(sourceFile);
-                removeConstructorIfEmpty(constructorDeclaration, constructorBody);
-            } else {
-                console.log(yellow(`Constructor of ${sourceFile.getBaseName()} has descendant Statements. Skipping refactoring of constructor. You can disable this behaviour with the -c option`));
-            }
+            insertPropertyAndRemoveParameter(classDeclaration, name, type, parameterDeclaration);
+            ensureInjectImport(sourceFile);
+            removeConstructorIfEmpty(constructorDeclaration, constructorBody);
         });
     }
 
