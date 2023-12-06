@@ -38,8 +38,8 @@ function main(){
      * @param {SourceFile} sourceFile - The source file to process.
      */
     function ensureInjectImport(sourceFile: SourceFile) {
-        const moduleSpecifierSpec = AngularSpecifications.importDeclaration.moduleSpecifier;
-        const namedImportsSpec = AngularSpecifications.importDeclaration.namedImports;
+        const moduleSpecifierSpec = '@angular/core';
+        const namedImportsSpec = { name: 'inject' };
 
         const angularCoreImport = sourceFile.getImportDeclaration(declaration => {
             return declaration.getModuleSpecifierValue() === moduleSpecifierSpec;
@@ -49,13 +49,16 @@ function main(){
             .some(namedImport => namedImport.getName() === namedImportsSpec.name);
 
         if (!foundInjectImport) {
-            sourceFile.addImportDeclaration({
-                moduleSpecifier: moduleSpecifierSpec,
-                namedImports: [namedImportsSpec],
-            });
+            if (angularCoreImport) {
+                angularCoreImport.addNamedImport(namedImportsSpec.name);
+            } else {
+                sourceFile.addImportDeclaration({
+                    moduleSpecifier: moduleSpecifierSpec,
+                    namedImports: [namedImportsSpec],
+                });
+            }
         }
     }
-
     /**
      * Refactors constructors in the source file to use 'inject'.
      * @param {SourceFile} sourceFile - The source file to process.
