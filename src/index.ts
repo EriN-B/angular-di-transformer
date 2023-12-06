@@ -85,7 +85,12 @@ function main(){
                     });
 
                     if (constructorDeclaration.getParameters().length === 0) {
-                        constructorDeclaration.remove();
+                        const constructorBody = constructorDeclaration.getBody();
+                        const hasCodeInBody = constructorBody && constructorBody.getDescendantStatements().length > 0;
+
+                        if (!hasCodeInBody) {
+                            constructorDeclaration.remove();
+                        }
                     }
                 });
             });
