@@ -4,7 +4,7 @@
   "description": "A tool that automates the migration of dependency injections from traditional constructor-based injection to the new, more efficient inject() method.",
   "main": "index.js",
   "scripts": {
-    "prettier": "prettier --config .prettierrc 'src/**/*.ts' --write",
+    "prettier": "prettier --config .prettierrc src/**/*.ts --write",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
