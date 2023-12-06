@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import {Project, Scope, SourceFile, ts} from "ts-morph";
-import { AngularSpecifications } from "./config/angular.specifications";
 import {isWorktreeClean} from "./utils/check-work-tree";
 import {getAngularVersion, isAngularWorkspace} from "./utils/check-angular-workspace";
 import {checkArgs, init} from "./utils/check-args";
